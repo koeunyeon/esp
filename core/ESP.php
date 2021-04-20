@@ -129,6 +129,17 @@ class ESP
         return "/" . self::$_resource . "/list/" . $page;
     }
 
+    public static function link_list_next_page($page = 1){
+        return self::link_list($page + 1);
+    }
+
+    public static function link_list_prev_page($page = 1){
+        if ($page == 1){
+            return self::link_list(1);
+        }
+        return self::link_list($page - 1);
+    }
+
     public static function link_login()
     {
         return "/member/login";
@@ -142,22 +153,31 @@ class ESP
         return new ESPDB($table_name);
     }
 
-    public static function view($path, $view_data = [])
-    {
-        $template_path = $_SERVER['DOCUMENT_ROOT'] . "/view/$path.php";
+    public static function part($path, $view_data = [])
+    {        
+        $template_path = $_SERVER['DOCUMENT_ROOT'] . "/part/$path.php";        
         if (file_exists($template_path)) {
+            extract($view_data);
             require($template_path);
         }
     }
 
-    public static function view_header()
+    public static function part_header($view_data = [])
     {
-        return self::view("common/header");
+        return self::part("common/header");
     }
 
-    public static function view_footer()
+    public static function part_footer($view_data = [])
     {
-        return self::view("common/footer");
+        return self::part("common/footer");
+    }
+
+    public static function part_auto($path = "", $view_data=[]){
+        if ($path == ""){
+            return self::part(self::$_resource . "/" . self::$_act, $view_data);
+        }
+
+        return self::part(self::$_resource . "/" . self::$_act . "." .$path, $view_data);
     }
 
     public static function auto_save($table_name = null, $use_columns = [])
@@ -217,6 +237,13 @@ class ESP
     {
         echo "PAGE NOT FOUND";
         header("HTTP/1.0 404 Not Found");
+        exit();
+    }
+
+    public static function response_json($esp_data){
+        $json_value = $esp_data->to_json();
+        header('Content-type: application/json');
+        echo $json_value;
         exit();
     }
 
@@ -290,6 +317,16 @@ class ESP
     {
         ESP::login_required();
         return self::is_author();
+    }
+
+    public static function html_ul_open($css_class=null, $html_id=null){
+        $css_class = $css_class == null ? "" : " class='$css_class' ";
+        $html_id = $html_id == null ? "" : " id='$html_id' ";
+        echo "<ul $css_class $html_id>";
+    }
+
+    public static function html_ul_close(){
+        echo "</ul>";
     }
 }
 
@@ -412,7 +449,7 @@ class ESPDB
 
     public function table_list()
     {
-        require(dirname(__FILE__) . "/p.config.PHP");
+        require(dirname(__FILE__) . "/esp.config.PHP");
         $dbname = $db_config['dbname'];
         $query = "select table_name from INFORMATION_SCHEMA.tables where table_schema = :table_schema order by table_name";
         $result = $this->execute_fetch_all($query, ['table_schema' => $dbname]);
@@ -421,7 +458,7 @@ class ESPDB
 
     public function table_exist()
     {
-        require(dirname(__FILE__) . "/p.config.PHP");
+        require(dirname(__FILE__) . "/esp.config.PHP");
         $dbname = $db_config['dbname'];
         $query = "select table_name from INFORMATION_SCHEMA.tables where table_schema = :table_schema and table_name = :table_name";
         $result = $this->execute_fetch_first($query, ['table_schema' => $dbname, 'table_name' => $this->table_name]);
@@ -430,7 +467,7 @@ class ESPDB
 
     public function column_list()
     {
-        require(dirname(__FILE__) . "/p.config.PHP");
+        require(dirname(__FILE__) . "/esp.config.PHP");
         $dbname = $db_config['dbname'];
         $query = "select column_name, column_default, is_nullable, data_type from INFORMATION_SCHEMA.columns where table_schema = :table_schema and table_name = :table_name";
         return $this->execute_fetch_all($query, ['table_schema' => $dbname, 'table_name' => $this->table_name]);
@@ -466,6 +503,21 @@ class ESPDB
         return $where;
     }
 
+    private function make_orderby($orderby){
+        if (ESP::trim($orderby) !== '') {
+            $orderby = " order by " . $orderby;
+        }
+        return $orderby;
+    }
+    
+    private function make_limit($limit){
+        if ($limit == null){
+            return "";
+        }
+    
+        return " limit $limit";
+    }
+
     public function insert()
     {
         $columns = array_keys($this->column_values);
@@ -487,11 +539,40 @@ class ESPDB
     {
         $id = ESP::get_id_by_request($id);
         if ($id == null) {
-            return new Magic();
+            return new EspData();
         }
 
         $query = " select * from {$this->table_name} where id=:id limit 1";
         return $this->execute_fetch_first($query, ['id' => $id]);
+    }
+
+    public function all($where_terms = [], $order_by=null, $limit=null)
+    {
+        $terms = $this->make_terms($where_terms);
+        $query = " select * from {$this->table_name} where $terms ";
+
+        $order_by = $this->make_orderby($order_by);
+        $limit = $this->make_limit($limit);
+        $query = "select * from {$this->table_name} $terms $order_by $limit";        
+        $result = $this->execute_fetch_all($query, $where_terms);
+        return $result;
+    }
+
+    public function pagenate($page_no, $where_terms = [], $order_by='insert_date desc', $count_per_page=10){
+        $offset = ($page_no -1) * $count_per_page;
+        return $this->all($where_terms, $order_by, "$offset,$count_per_page");
+    }
+
+    public function count($where_terms){
+        $terms = $this->make_terms($where_terms);
+        $query = " select count(id) as cnt from {$this->table_name} where $terms ";
+        $result = $this->execute_fetch_all($query, $where_terms);
+        return $result[0]['cnt'];
+    }
+
+    public function exist($where_terms){
+        $result = $this->count($where_terms);
+        return $result > 0;
     }
 
     public function update($id = null)
@@ -574,5 +655,9 @@ class EspData
     public function items()
     {
         return $this->attributes;
+    }
+
+    public function to_json(){
+        return json_encode($this->attributes);
     }
 }
