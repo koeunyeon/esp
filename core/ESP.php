@@ -180,17 +180,17 @@ class ESP
         return self::part(self::$_resource . "/" . self::$_act . "." .$path, $view_data);
     }
 
-    public static function auto_insert($table_name = null, $use_columns = []){
+    public static function auto_insert($table_name = null, $use_columns = [], $extra_data=[]){
         if (self::is_post()) {
-            $id = ESP::db($table_name)->param($use_columns)->insert();
+            $id = ESP::db($table_name)->param($use_columns)->fill($extra_data)->insert();
             return $id;
         }
         return null;
     }
 
-    public static function auto_update($table_name = null, $use_columns = []){
+    public static function auto_update($table_name = null, $use_columns = [], $extra_data=[]){
         if (self::is_post()) {
-            $upd_result = ESP::db($table_name)->param($use_columns)->update();
+            $upd_result = ESP::db($table_name)->param($use_columns)->fill($extra_data)->update();
             if ($upd_result) {
                 self::redirect_read();
             } else {
@@ -199,15 +199,15 @@ class ESP
         }
     }
 
-    public static function auto_save($table_name = null, $use_columns = [])
+    public static function auto_save($table_name = null, $use_columns = [], $extra_data=[])
     {
         if (self::$_act == "create") {
-            $id = self::auto_insert($table_name, $use_columns);
+            $id = self::auto_insert($table_name, $use_columns, $extra_data);
             if ($id != null){
                 self::redirect_read($id);
             }
         } elseif (self::$_act == "edit") {
-            self::auto_update($table_name, $use_columns);
+            self::auto_update($table_name, $use_columns, $extra_data);
         }
     }
 
@@ -439,7 +439,8 @@ class ESPDB
     }
 
     public function fill($column_values){
-        $this->column_values = $column_values;
+        var_dump($column_values);
+        $this->column_values = array_merge($this->column_values, $column_values);
         return $this;
     }
 
@@ -623,8 +624,8 @@ class ESPDB
     }
 
     public function insert()
-    {
-        $columns = array_keys($this->column_values);
+    {        
+        $columns = array_keys($this->column_values);        
         $value_placeholders = array_map(
             function ($key) {
                 return ":$key";
