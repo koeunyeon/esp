@@ -142,7 +142,7 @@ class ESP
 
     public static function link_login()
     {
-        return "/member/login";
+        return "/user/login";
     }
 
     public static function db($table_name = null)
@@ -180,22 +180,34 @@ class ESP
         return self::part(self::$_resource . "/" . self::$_act . "." .$path, $view_data);
     }
 
+    public static function auto_insert($table_name = null, $use_columns = []){
+        if (self::is_post()) {
+            $id = ESP::db($table_name)->param($use_columns)->insert();
+            return $id;
+        }
+        return null;
+    }
+
+    public static function auto_update($table_name = null, $use_columns = []){
+        if (self::is_post()) {
+            $upd_result = ESP::db($table_name)->param($use_columns)->update();
+            if ($upd_result) {
+                self::redirect_read();
+            } else {
+                self::response_404_page_not_found();
+            }
+        }
+    }
+
     public static function auto_save($table_name = null, $use_columns = [])
     {
         if (self::$_act == "create") {
-            if (self::is_post()) {
-                $id = ESP::db($table_name)->param($use_columns)->insert();
+            $id = self::auto_insert($table_name, $use_columns);
+            if ($id != null){
                 self::redirect_read($id);
             }
         } elseif (self::$_act == "edit") {
-            if (self::is_post()) {
-                $upd_result = ESP::db($table_name)->param($use_columns)->update();
-                if ($upd_result) {
-                    self::redirect_read();
-                } else {
-                    self::response_404_page_not_found();
-                }
-            }
+            self::auto_update($table_name, $use_columns);
         }
     }
 
@@ -325,9 +337,11 @@ class ESP
     }
 
     // login
+    public static $_LOGIN_KEY = "LOGIN_ID";
+    
     public static function is_login()
     {
-        return self::session_has_key("login_id");
+        return self::session_has_key(self::$_LOGIN_KEY);
     }
 
     public static function login_required()
@@ -337,14 +351,59 @@ class ESP
         }
     }
 
-    public static function login($login_id)
+    public static function regist($login_id=null, $login_pw=null){
+        $login_id = $login_id ?? self::param("login_id", null);
+        $login_pw = $login_pw ?? self::param("login_pw", null);
+        
+        if ($login_id == null || $login_pw == null){
+            return [false, "INVALID_PARAMETER"];
+        }
+
+        $user_exist = self::db("esp_user")->exist(['login_id'=> $login_id]);
+        if ($user_exist){
+            return [false, "USER_EXIST"];
+        }
+
+        $login_pw = password_hash($login_pw, PASSWORD_BCRYPT);
+
+        self::db("esp_user")->fill(['login_id'=>$login_id, 'login_pw'=>$login_pw])->insert();
+        return [true, "SUCCESS"];
+    }
+
+    public static function login($login_id=null, $login_pw=null){
+        $login_id = $login_id ?? self::param("login_id", null);
+        $login_pw = $login_pw ?? self::param("login_pw", null);
+        
+        if ($login_id == null || $login_pw == null){            
+            exit();
+            return false;
+        }
+
+        $user = self::db("esp_user")->first(['login_id'=> $login_id]);
+        if ($user->is_empty()){
+            return false;
+        }
+
+        if (password_verify($login_pw, $user->login_pw)){
+            self::login_success($login_id);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function login_success($login_id)
     {
-        self::session_set("login_id", $login_id);
+        self::session_set(self::$_LOGIN_KEY, $login_id);
+    }
+
+    public static function logout(){
+        self::session_remove(self::$_LOGIN_KEY);
     }
 
     public static function login_id()
     {
-        return self::session_get("login_id");
+        return self::session_get(self::$_LOGIN_KEY);
     }
 
     // is_author
@@ -378,6 +437,11 @@ class ESPDB
     public function __construct($table_name)
     {
         $this->table_name = $table_name;
+    }
+
+    public function fill($column_values){
+        $this->column_values = $column_values;
+        return $this;
     }
 
     public function param($use_columns = [])
@@ -587,11 +651,17 @@ class ESPDB
         return $this->execute_fetch_first($query, ['id' => $id]);
     }
 
+    public function first($where_terms){
+        $terms = $this->make_terms($where_terms);
+        $query = " select * from {$this->table_name} $terms limit 1";
+        $result = $this->execute_fetch_first($query, $where_terms);
+        return $result;
+
+    }
+
     public function all($where_terms = [], $order_by=null, $limit=null)
     {
         $terms = $this->make_terms($where_terms);
-        $query = " select * from {$this->table_name} where $terms ";
-
         $order_by = $this->make_orderby($order_by);
         $limit = $this->make_limit($limit);
         $query = "select * from {$this->table_name} $terms $order_by $limit";        
@@ -606,9 +676,9 @@ class ESPDB
 
     public function count($where_terms){
         $terms = $this->make_terms($where_terms);
-        $query = " select count(id) as cnt from {$this->table_name} where $terms ";
-        $result = $this->execute_fetch_all($query, $where_terms);
-        return $result[0]['cnt'];
+        $query = " select count(id) as cnt from {$this->table_name} $terms ";        
+        $result = $this->execute_fetch_all($query, $where_terms);        
+        return $result[0]->cnt;
     }
 
     public function exist($where_terms){
