@@ -183,6 +183,85 @@ Because `response_json` works for all arrays, associative arrays, strings, and E
 
 Check it out at [http://localhost:8000/article/read_json/1](http://localhost:8000/article/read_json/1).
 
+
+## Adding headers and footers
+Most websites use a common header and footer.  
+ESP provides an easy way to attach headers and footers using `part`.  
+Create a `/part/common/header.php` file.  
+```
+<!DOCTYPE html>
+<head>
+<title>ESP</title>
+</head>
+<body>
+<h1>Header area</h1>
+```
+
+Just like the header, I'll put the footer.  
+Create a `/part/common/footer.php` file.  
+```
+<footer>footer area</footer>
+</body>
+</html>
+```
+
+Now modify the creation page as shown below.  
+```
+... skip ...
+
+ESP::auto_save(null, ['title','content']);
+?>
+<?php ESP::part_header(); ?>
+<form method="POST">
+
+... skip ...
+```
+```
+... skip ...
+
+</form>
+<?php ESP::part_footer(); ?>
+```
+
+You can attach headers and footers using the `part_header()` and `part_footer()` methods.  
+
+### Membership screen and features
+`/src/user/regist.php`
+```
+<?php
+list($result, $message) = ESP::regist();
+if ($result){
+    ESP::redirect("/user/login");
+}
+?>
+<?php ESP::part_header(); ?>
+<form method="POST">
+    <p>user_id: <input type="text" name="login_id" id="login_id" value="<?= ESP::param("login_id") ?? "" ?>" /></p>
+    <p>user_pw: <input type="password" name="login_pw" id="login_pw" value="<?= ESP::param("login_pw") ?? "" ?>"/></p>
+    <p><input type="submit" value="submit" /></p>
+</form>
+<?php ESP::part_footer(); ?>
+```
+The `regist()` method proceeds with membership registration based on the `login_id` and `login_pw` parameters.  
+The `param()` method reads a parameter. In the case of http GET request, the value is read from $_GET, in the case of http POST request, the value is read from $_POST. If there is no value corresponding to the http method, other parameters are read.  
+## login
+Login is similar to signing up, so I'll just introduce the code.  
+`/src/user/login.php`
+```
+<?php
+if (ESP::login())(
+    ESP::redirect("/article/list");
+}
+?>
+<?php ESP::part_header(); ?>
+<form method="POST">
+<p>user_id: <input type="text" name="login_id" id="login_id" value="<?= ESP::param("login_id") ?? "" ?>" /></p>
+    <p>user_pw: <input type="password" name="login_pw" id="login_pw" value="<?= ESP::param("login_pw") ?? "" ?>"/></p>
+    <p><input type="submit" value="login" /></p>
+</form>
+<?php ESP::part_footer(); ?>
+```
+
 # ABOUT
 ## ESP is not an MVC framework.
 Yes. ESP is not an MVC framework.  

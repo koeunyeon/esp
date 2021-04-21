@@ -178,13 +178,103 @@ ESP는 웹 페이지가 여러 개의 조각으로 구성될 수 있다고 가�
     ESP::response_json($model);
 ```
 이 코드는 현재 id의 상세 내용을 반환합니다.
-ESP에서 JSON을 응답하기 위해서 `response_json`이라는 간단한 래퍼 함수가 있습니다. 
+ESP에는 JSON을 응답하기 위해서 `response_json`이라는 간단한 래퍼 함수가 있습니다. 
 `response_json`은 배열, 연관 배열, 문자열, EspData 타입 전부에 대해 동작하므로 단순히 `ESP::response_json($데이터);` 형식으로 응답을 보장할 수 있습니다.
 
 [http://localhost:8000/article/read_json/1](http://localhost:8000/article/read_json/1) 에서 확인해 보세요.
 
+## 헤더와 푸터 추가하기
+대부분의 웹 사이트는 공통의 헤더와 푸터를 사용합니다.  
+ESP에서는 `part`를 이용해서 헤더와 푸터를 쉽게 붙일 수 있는 방법을 제공합니다.  
+`/part/common/header.php` 파일을 만듭니다.  
+```
+<!DOCTYPE html>
+<head>
+<title>ESP</title>
+</head>
+<body>
+<h1>헤더 영역</h1>
+```
 
+헤더와 마찬가지로 푸터도 넣겠습니다.
+`/part/common/footer.php` 파일을 만듭니다.  
+```
+<footer>푸터 영역</footer>
+</body>
+</html>
+```
 
+이제 생성 페이지를 아래와 같이 수정합니다.
+```
+... 생략 ...
+
+ESP::auto_save(null, ['title', 'content']);
+?>
+<?php ESP::part_header(); ?>
+<form method="POST">
+
+... 생략 ...
+```
+```
+... 생략 ...
+
+</form>
+<?php ESP::part_footer(); ?>
+```
+
+`part_header()`와 `part_footer()` 메소드를 이용해서 헤더와 푸터를 붙일 수 있습니다.
+
+## 회원가입
+회원 가입을 만들어 봅시다.
+### 회원 테이블
+먼저 회원 테이블을 생성합니다. 만약 ESP에 내장된 회원 기능을 사용하려면 `esp_user` 테이블이 필수입니다.
+```
+CREATE TABLE `esp_user` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`login_id` VARCHAR(20) NOT NULL,	
+	`login_pw` VARCHAR(256) NOT NULL,	
+	`insert_date` DATETIME NOT NULL,
+	`update_date` DATETIME NULL DEFAULT NULL,
+	PRIMARY KEY (`id`)
+)
+```
+
+### 회원 가입 화면 및 기능
+`/src/user/regist.php`
+```
+<?php
+list($result, $message) = ESP::regist();
+if ($result){
+    ESP::redirect("/user/login");
+}
+?>
+<?php ESP::part_header(); ?>
+<form method="POST">
+    <p>user_id : <input type="text" name="login_id" id="login_id" value="<?= ESP::param("login_id") ?? "" ?>" /></p>
+    <p>user_pw : <input type="password" name="login_pw" id="login_pw"  value="<?= ESP::param("login_pw") ?? "" ?>"/></p>
+    <p><input type="submit" value="회원가입" /></p>
+</form>
+<?php ESP::part_footer(); ?>
+```
+`regist()` 메소드는 `login_id`와 `login_pw` 파라미터를 바탕으로 회원 가입을 진행합니다.
+`param()` 메소드는 파라미터를 읽습니다. http GET 요청일 때는 $_GET에서, http POST 요청일때는 $_POST에서 값을 읽고, 만약에 http 메소드에 해당하는 값이 없다면 다른 파라미터를 읽습니다.
+## 로그인
+로그인도 회원 가입과 비슷하므로 코드만 소개하겠습니다.
+`/src/user/login.php`
+```
+<?php
+if (ESP::login()){
+    ESP::redirect("/article/list");
+}
+?>
+<?php ESP::part_header(); ?>
+<form method="POST">
+<p>user_id : <input type="text" name="login_id" id="login_id" value="<?= ESP::param("login_id") ?? "" ?>" /></p>
+    <p>user_pw : <input type="password" name="login_pw" id="login_pw"  value="<?= ESP::param("login_pw") ?? "" ?>"/></p>
+    <p><input type="submit" value="로그인" /></p>
+</form>
+<?php ESP::part_footer(); ?>
+```
 
 # ABOUT
 ## ESP는 MVC 프레임워크가 아닙니다.
