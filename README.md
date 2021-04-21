@@ -23,7 +23,7 @@ $db_config=[
 ```
 
 ## URL Mapping
-When the `/article/create` URL is requested, the `/src/article/create.php` file is executed.
+When the `/article/create` URL is requested, the `/src/article/create.php` file is executed.  
 ESP's URL rule consists of `/{resource}/{action}/{parameter}`.
 
 ## Save (Create / Edit)
