@@ -299,6 +299,27 @@ ESP::auto_save(null, ['title','content'], ['author_id'=>ESP::login_id()]);
 ```
 The first argument of the `auto_save` method is the table name, and the second is a list of keys to be used among POST data.  
 The last argument is the additional data to be stored.
+
+## Checking if the author is the author when editing a post
+Let's add only one line to the post edit file.
+```
+<?php
+ESP::author_if_not_matched_to_list();
+ESP::auto_save(null, ['title','content']);
+```
+
+The added code is `ESP::author_if_not_matched_to_list();`.  
+ESP has a method `author_matched` that checks whether you are logged in if there is a `author_id` column in the table, and if you are logged in, the currently logged in ID matches the author_id.  
+There is also an `author_if_not_matched_to_list()` that automatically moves to the list if it does not match.  
+
+## Add author confirmation to delete function as well
+`/src/article/delete.php`
+```
+<?php
+ESP::author_if_not_matched_to_list();
+ESP::auto_delete();
+```
+
 # ABOUT
 ## ESP is not an MVC framework.
 Yes. ESP is not an MVC framework.  

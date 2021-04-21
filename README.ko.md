@@ -314,6 +314,27 @@ ESP::auto_save(null, ['title', 'content'], ['author_id'=>ESP::login_id()]);
 ```
 `auto_save` 메소드의 첫번째 인수는 테이블 이름, 두번째는 POST 데이터 중 사용할 키 목록. 마지막 인수는 추가로 저장할 데이터입니다.
 
+## 글 수정시 작성자인지 확인하기
+글 수정 파일에 한 줄만 추가합시다.
+`/src/article/edit.php`
+```
+<?php
+ESP::author_if_not_matched_to_list();
+ESP::auto_save(null, ['title', 'content']);
+```
+
+추가된 코드는 `ESP::author_if_not_matched_to_list();` 입니다.  
+ESP는 테이블에 `author_id` 컬럼이 있을 경우 로그인되어 있는지, 로그인되어 있다면 현재 로그인된 ID가 author_id와 일치하는지 확인하는 메소드 `author_matched`가 있습니다.  
+또한 만약 일치하지 않을 경우 자동으로 목록으로 이동하는 `author_if_not_matched_to_list()`도 준비되어 있습니다.  
+
+## 삭제 기능에도 작성자 확인 추가하기
+`/src/article/delete.php`
+```
+<?php
+ESP::author_if_not_matched_to_list();
+ESP::auto_delete();
+```
+
 # ABOUT
 ## ESP는 MVC 프레임워크가 아닙니다.
 ESP는 MVC 프레임 워크가 아닙니다.  
