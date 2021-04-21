@@ -530,7 +530,7 @@ class ESPDB
 
         $strColumn = implode(",", $columns);
         $strValuePlaceHolders = implode(",", $value_placeholders);
-        $query = "insert into {$this->table_name} ($strColumn) values ($strValuePlaceHolders)";
+        $query = "insert into {$this->table_name} ($strColumn, insert_date) values ($strValuePlaceHolders, now())";
 
         return $this->execute_last_id($query, $this->column_values);
     }
@@ -586,6 +586,7 @@ class ESPDB
 
         $columns = array_keys($this->column_values);
 
+
         // 배열의 각 아이템에 항목 적용시키기.
         $placeholders = array_map(
             function ($key) {
@@ -599,7 +600,7 @@ class ESPDB
         $terms = $this->make_terms($where_terms);
         $total_kv = array_merge($this->column_values, $where_terms);
 
-        $query = "update {$this->table_name} set $strPlaceHolders $terms";
+        $query = "update {$this->table_name} set $strPlaceHolders, update_date=now() $terms";
         $result = $this->execute($query, $total_kv);
         return $result;
     }
