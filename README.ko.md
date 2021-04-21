@@ -3,6 +3,9 @@ ESP는 **Extreme Short PHP**의 약자입니다.
 중복을 배제하고 짧은 코드를 지향하는 PHP 프레임워크입니다.  
 자동으로 처리할 수 있는 부분은 가능한 자동화합니다.  
 
+- 한국어 소개 페이지는 [ESP 한국어 소개](https://github.com/koeunyeon/esp/blob/main/README.ko.md)에서 볼 수 있습니다.
+- 영어 소개 페이지는 [ESP 영어 소개](https://github.com/koeunyeon/esp/blob/main/README.md)에 있습니다.
+
 # 시작하기
 ## 우리가 만들어 볼 것
 우리는 아주 간단한 블로그 시스템을 만듭니다.  
@@ -109,9 +112,65 @@ ESP의 `auto_find()`는 `auto_save()`와 비슷하게 `{리소스}`에서 `$id`�
 만약 URL이 `{리소스}/{액션}/{ID}` 형태일 경우 ESP는 자동으로 `$_GET['id']` 대신 URL에서 `$id` 변수를 읽습니다.  
 즉 `/article/read?id=3` 대신 `/article/read/3` 형태로도 사용 가능합니다.  
 
-불러온 데이터는 `$model->title` 처럼 객체 형태로 사용합니다.  
+`link_edit()`, `link_delete()`, `link_list()` 정적 메소드는 현재 `{리소스}`에 해당하는 수정, 삭제, 목록 링크를 자동으로 만들어주는 헬퍼입니다.
+
+## 블로그 글 수정 만들기
+`/src/article/edit.php` 파일을 만듭니다.
+```
+<?php
+ESP::auto_save();
+$model = ESP::auto_find();
+?>
+<form method="POST">
+    <p>title : <input type="text" name="title" id="title" value="<?= $model->title ?>" /></p>
+    <p>content : <input type="text" name="content" id="content" value="<?= $model->content ?>" /></p>
+    <input type="submit" value="저장" />
+</form>
+```
+
+ESP의 `auto_save()` 메소드는 `{액션}`에 따라 `insert`와 `update`를 구분합니다.  
+따라서 `create.php`와 `edit.php`에서 동일한 함수를 호출해도 `create`에서는 `insert`, `edit`에서는 `update` 동작합니다.
+
+`$model = ESP::auto_find()`로 불러온 데이터는 `$model->title` 처럼 객체 형태로 사용합니다.  
 예제 코드에서 `$model`은 `EspData` 타입으로 잘못된 키가 있어도 오류를 반환하지 않고 빈 문자열(`""`)을 반환합니다.  
 즉 `article` 테이블에 `missing` 컬럼이 없어도 `$model->missing` 은 `""`을 리턴하므로 실제 데이터 유무에 관계없이 생각한 대로 코드를 작성할 수 있습니다.  
+
+## 블로그 글 삭제 만들기
+이번에는 삭제입니다. `/src/article/delete.php` 파일을 만듭니다.
+```
+<?php
+ESP::auto_delete();
+```
+단 한줄입니다. ESP는 자동으로 리소스를 삭제하고 목록 페이지로 이동합니다.
+
+## 블로그 글 목록 보여주기
+마지막은 글 목록을 보여줍시다. `/src/article/list.php` 파일을 만듭니다.
+```
+<?php
+$page_list = ESP::auto_pagenate();
+?>
+<ul>
+    <?php
+    foreach ($page_list as $row) {
+        ESP::part_auto("row", $row->items());
+    }
+    ?>
+</ul>
+```
+
+아직 실행하기 전에 파일을 하나 더 만들겠습니다. 경로는 `/part/article/list.row.php` 입니다.
+```
+<li><a href="<?= ESP::link_read($id) ?>"><?= $title ?></a></li>
+```
+
+ESP는 웹 페이지가 여러 개의 조각으로 구성될 수 있다고 가정합니다. 따라서 각 조각을 쉽게 끼워넣을 수 있도록 `part` 계열의 메소드들을 제공합니다.  
+예제에 쓰인 `part_auto` 메소드는 자동으로 `/part/{리소스}/{액션}.{경로}.php` 파일을 호출하고 `데이터`를 조각을 전달하는 역할을 합니다.  
+즉 `ESP::part_auto("row", $row->items());` 코드는 `/part/article/list.row.php` 파일에 `$row->items()` 데이터를 전달합니다.  
+
+부분을 구성하는 파일들 (`/part` 디렉토리 아래의 파일들)은 연관 배열로 전달받은 값들을 변수처럼 사용할 수 있습니다.  
+`/part/article/list.row.php`의 `$id`와 `$title`은 `/src/article/list.php`의 `$row->items()` 연관 배열의 값입니다.
+
+
 
 # ABOUT
 ## ESP는 MVC 프레임워크가 아닙니다.
@@ -128,7 +187,7 @@ ESP는 혼란스럽고 체계적이지 않지만 유용한 기능을 포함합�
 PHP 7버전부터 PHP는 자바가 장악하고 있는 엔터프라이즈 영역을 노리는 것처럼 변화하고 있습니다.  
 하지만 저는 PHP와 자바는 포지셔닝이 달라야 한다고 생각합니다.  
 잔소리쟁이 엄마처럼 모든 것에 규칙을 세우고, 규칙에 어긋나면 따가운 소리를 들어야 하는 자바 세상도 나쁘지는 않습니다.  
-그렇지만 때로는 규칙보다는 실리를, 단단함보다는 속도를 중시해야 하는 경우도 있습니다.  
+그렇지만 때로는 규칙과 단단함보다는 속도를 중시해야 하는 경우도 있습니다.  
 특히 "출시하고 잊어버리는" 웹 에이전시 스타일의 개발에서는 더욱 그렇습니다.  
 
 PHP는 "혼자 작업하기 좋은 언어"이고, "스스로 규칙을 세울 수 있다는 점에서 더욱 좋은 언어"입니다.  

@@ -3,6 +3,8 @@ ESP stands for **Extreme Short PHP**.
 It is a PHP framework that excludes the two and is oriented towards short code.  
 Any part that can be handled automatically is as automated as possible.  
 
+-The Korean introduction page can be viewed at [ESP Korean Introduction](https://github.com/koeunyeon/esp/blob/main/README.ko.md).
+-The English introduction page is in [ESP English Introduction](https://github.com/koeunyeon/esp/blob/main/README.md).
 
 # Getting started
 ## what we will make
@@ -110,9 +112,63 @@ Where is the `$id` variable? As you might expect, it reads `$_GET['id]`.
 If the URL is in the form of `{Resource}/{Action}/{ID}`, ESP automatically reads the `$id` variable from the URL instead of `$_GET['id']`.
 That is, instead of `/article/read?id=3`, it can also be used in the form of `/article/read/3`.
 
+The static methods `link_edit()`, `link_delete()`, and `link_list()` are helpers that automatically create edit, delete, and list links for the current `{resource}`.
+
+## Create a blog post edit
+Create the `/src/article/edit.php` file.
+```
+<?php
+ESP::auto_save();
+$model = ESP::auto_find();
+?>
+<form method="POST">
+     <p>title: <input type="text" name="title" id="title" value="<?= $model->title ?>" /></p>
+     <p>content: <input type="text" name="content" id="content" value="<?= $model->content ?>" /></p>
+     <input type="submit" value="save" />
+</form>
+```
+
+ESP's `auto_save()` method differentiates between `insert` and `update` according to `{action}`.
+Therefore, even if you call the same function in `create.php` and `edit.php`, `insert` works in `create` and `update` works in `edit`.
+
 The loaded data is used as an object like `$model->title`.
 In the example code, `$model` is a `EspData` type. Even if there is an invalid key, an empty string (`""`) is returned without returning an error.
 In other words, even if there is no `missing` column in the `article` table, `$model->missing` returns `""`, so you can write the code as you think, regardless of whether there is actual data or not.
+
+## Create a blog post delete
+This time it is delete. Create a `/src/article/delete.php` file.
+```
+<?php
+ESP::auto_delete();
+```
+It's only one line. ESP automatically deletes the resource and goes to the list page.  
+
+## show the list of blog posts
+Finally, let's show the list of articles. Create a `/src/article/list.php` file.
+```
+<?php
+$page_list = ESP::auto_pagenate();
+?>
+<ul>
+    <?php
+    foreach ($page_list as $row) {
+        ESP::part_auto("row", $row->items());
+    }
+    ?>
+</ul>
+```
+
+I'll create one more file before running it yet. The path is `/part/article/list.row.php`.
+```
+<li><a href="<?= ESP::link_read($id) ?>"><?= $title ?></a></li>
+```
+
+ESP assumes that a web page can be made up of several pieces. Therefore, it provides `part` family of methods to easily insert each piece.
+The `part_auto` method used in the example is responsible for automatically calling the `/part/{resource}/{action}.{path}.php` file and passing the `data` fragment.
+That is, the `ESP::part_auto("row", $row->items());` code passes `$row->items()` data to the `/part/article/list.row.php` file. .
+
+Files that make up a part (files under the `/part` directory) can use the values ​​passed in associative arrays like variables.
+`$id` and `$title` in `/part/article/list.row.php` are the values ​​of the `$row->items()` associative array in `/src/article/list.php`.
 
 # ABOUT
 ## ESP is not an MVC framework.
@@ -129,7 +185,7 @@ Every tool has its own role. Even the finest hammer is not suitable for making s
 From PHP version 7, PHP is changing as if it targets the enterprise domain dominated by Java.  
 But I think PHP and Java should have different positioning.  
 It's not bad for a Java world where you have to set rules on everything like a nagging mother and listen to a stinging sound if it goes against the rules.  
-However, there are times when you need to put more money on the rules than the rules and the speed rather than the stiffness.  
+Sometimes, though, you need to value speed over rules and rigidity.
 This is especially true for "release and forget" web agency style development.  
 
 PHP is a "good language to work with on your own", and "a better language in that you can set your own rules."  
