@@ -1,4 +1,5 @@
 <?php
+ESP::author_if_not_matched_to_list();
 ESP::auto_save(null, ['title', 'content']);
 $model = ESP::auto_find();
 ?>
