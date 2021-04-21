@@ -1,6 +1,6 @@
 <?php
 ESP::login_required();
-ESP::auto_save(null, ['title', 'content']);
+ESP::auto_save(null, ['title', 'content'], ['author_id'=>ESP::login_id()]);
 ?>
 <?php ESP::part_header(); ?>
 <h2><?= ESP::$_resource ?> CREATE</h2>
