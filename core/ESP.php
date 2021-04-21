@@ -219,6 +219,11 @@ class ESP
         }
     }
 
+    public static function auto_pagenate($table_name = null, $where_terms = [], $order_by='insert_date desc', $count_per_page=10){
+        $page_no = ESP::param_uri(0, "1");
+        return self::db($table_name)->pagenate($page_no, $where_terms, $order_by, $count_per_page);
+    }
+
     public static function array_to_espdata($array)
     {
         $data = new EspData();
