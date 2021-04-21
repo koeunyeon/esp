@@ -256,10 +256,10 @@ if ($result){
 </form>
 <?php ESP::part_footer(); ?>
 ```
-`regist()` 메소드는 `login_id`와 `login_pw` 파라미터를 바탕으로 회원 가입을 진행합니다.
-`param()` 메소드는 파라미터를 읽습니다. http GET 요청일 때는 $_GET에서, http POST 요청일때는 $_POST에서 값을 읽고, 만약에 http 메소드에 해당하는 값이 없다면 다른 파라미터를 읽습니다.
+`regist()` 메소드는 `login_id`와 `login_pw` 파라미터를 바탕으로 회원 가입을 진행합니다.  
+`param()` 메소드는 파라미터를 읽습니다. http GET 요청일 때는 $_GET에서, http POST 요청일때는 $_POST에서 값을 읽고, 만약에 http 메소드에 해당하는 값이 없다면 다른 파라미터를 읽습니다.  
 ## 로그인
-로그인도 회원 가입과 비슷하므로 코드만 소개하겠습니다.
+로그인도 회원 가입과 비슷하므로 코드만 소개하겠습니다.  
 `/src/user/login.php`
 ```
 <?php
@@ -285,7 +285,7 @@ ESP::redirect("/article/list");
 ```
 
 ## 글쓰기에서 로그인 처리
-글쓰기 파일에 `ESP::login_required();` 코드를 추가합니다.
+글쓰기 파일에 `ESP::login_required();` 코드를 추가합니다.  
 `/src/article/create.php`
 ```
 <?php
@@ -302,7 +302,7 @@ ESP::auto_save(null, ['title', 'content']);
 ALTER TABLE `article` ADD COLUMN `author_id` VARCHAR(512) NULL DEFAULT NULL AFTER `update_date`;	
 ```
 
-글쓰기 파일에 글쓴이 정보를 추가합니다.
+글쓰기 파일에 글쓴이 정보를 추가합니다.  
 `/src/article/create.php`
 ```
 <?php
@@ -315,7 +315,7 @@ ESP::auto_save(null, ['title', 'content'], ['author_id'=>ESP::login_id()]);
 `auto_save` 메소드의 첫번째 인수는 테이블 이름, 두번째는 POST 데이터 중 사용할 키 목록. 마지막 인수는 추가로 저장할 데이터입니다.
 
 ## 글 수정시 작성자인지 확인하기
-글 수정 파일에 한 줄만 추가합시다.
+글 수정 파일에 한 줄만 추가합시다.  
 `/src/article/edit.php`
 ```
 <?php
