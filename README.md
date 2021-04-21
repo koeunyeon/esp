@@ -3,8 +3,8 @@ ESP stands for **Extreme Short PHP**.
 It is a PHP framework that excludes the two and is oriented towards short code.  
 Any part that can be handled automatically is as automated as possible.  
 
--The Korean introduction page can be viewed at [ESP Korean Introduction](https://github.com/koeunyeon/esp/blob/main/README.ko.md).
--The English introduction page is in [ESP English Introduction](https://github.com/koeunyeon/esp/blob/main/README.md).
+- The Korean introduction page can be viewed at [ESP Korean Introduction](https://github.com/koeunyeon/esp/blob/main/README.ko.md).
+- The English introduction page is in [ESP English Introduction](https://github.com/koeunyeon/esp/blob/main/README.md).
 
 # Getting started
 ## what we will make
@@ -169,6 +169,19 @@ That is, the `ESP::part_auto("row", $row->items());` code passes `$row->items()`
 
 Files that make up a part (files under the `/part` directory) can use the values ​​passed in associative arrays like variables.  
 `$id` and `$title` in `/part/article/list.row.php` are the values ​​of the `$row->items()` associative array in `/src/article/list.php`.  
+
+## Handling JSON
+Let's create the `/src/article/read_json.php` file.
+```
+<?php
+     $model = ESP::auto_find();
+     ESP::response_json($model);
+```
+This code returns the details of the current id.
+There is a simple wrapper function called `response_json` to respond to JSON in ESP.
+Because `response_json` works for all arrays, associative arrays, strings, and EspData types, you can guarantee a response simply in the form of `ESP::response_json($data);`.
+
+Check it out at [http://localhost:8000/article/read_json/1](http://localhost:8000/article/read_json/1).
 
 # ABOUT
 ## ESP is not an MVC framework.

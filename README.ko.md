@@ -170,6 +170,20 @@ ESP는 웹 페이지가 여러 개의 조각으로 구성될 수 있다고 가�
 부분을 구성하는 파일들 (`/part` 디렉토리 아래의 파일들)은 연관 배열로 전달받은 값들을 변수처럼 사용할 수 있습니다.  
 `/part/article/list.row.php`의 `$id`와 `$title`은 `/src/article/list.php`의 `$row->items()` 연관 배열의 값입니다.
 
+## JSON 다루기
+`/src/article/read_json.php` 파일을 생성해 봅시다.
+```
+<?php            
+    $model = ESP::auto_find();
+    ESP::response_json($model);
+```
+이 코드는 현재 id의 상세 내용을 반환합니다.
+ESP에서 JSON을 응답하기 위해서 `response_json`이라는 간단한 래퍼 함수가 있습니다. 
+`response_json`은 배열, 연관 배열, 문자열, EspData 타입 전부에 대해 동작하므로 단순히 `ESP::response_json($데이터);` 형식으로 응답을 보장할 수 있습니다.
+
+[http://localhost:8000/article/read_json/1](http://localhost:8000/article/read_json/1) 에서 확인해 보세요.
+
+
 
 
 # ABOUT
