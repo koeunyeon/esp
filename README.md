@@ -177,8 +177,8 @@ Let's create the `/src/article/read_json.php` file.
      $model = ESP::auto_find();
      ESP::response_json($model);
 ```
-This code returns the details of the current id.
-There is a simple wrapper function called `response_json` to respond to JSON in ESP.
+This code returns the details of the current id.  
+There is a simple wrapper function called `response_json` to respond to JSON in ESP.  
 Because `response_json` works for all arrays, associative arrays, strings, and EspData types, you can guarantee a response simply in the form of `ESP::response_json($data);`.
 
 Check it out at [http://localhost:8000/article/read_json/1](http://localhost:8000/article/read_json/1).
