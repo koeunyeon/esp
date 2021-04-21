@@ -33,17 +33,13 @@ function uri_bind(){
         $path = $resource . "/" . $act;
         $_GET['id'] = $id;        
         $_GET['__esp_uri'] = array_slice($arr_path, 2);
-
-        if ($arr_path[count($arr_path) -1] == "json"){
-            $path = $resource . "/" . $act . ".json";
-        }
     }
     else{
         ESP::response_404_page_not_found();
     }
     
-    $file_path = $_SERVER["DOCUMENT_ROOT"] . "/src/$path.php";
-    if (file_exists($file_path)){        
+    $file_path = $_SERVER["DOCUMENT_ROOT"] . "/src/$path.php";    
+    if (file_exists($file_path)){                
         ESP::resource($resource, $act);
         require($file_path);
         exit();
