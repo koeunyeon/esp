@@ -276,6 +276,26 @@ if (ESP::login()){
 <?php ESP::part_footer(); ?>
 ```
 
+## 로그아웃
+로그아웃은 몹시 직관적입니다.
+```
+<?php
+ESP::logout();
+ESP::redirect("/article/list");
+```
+
+## 글쓰기에서 로그인 처리
+글쓰기 파일에 `ESP::login_required();` 코드를 추가합니다.
+`/src/article/create.php`
+```
+<?php
+ESP::login_required();
+ESP::auto_save(null, ['title', 'content']);
+
+... 생략 ...
+```
+이제 `/article/create` 주소에 접근하면 로그인이 되어 있지 않다면 자동으로 로그인 페이지로 이동합니다.
+
 # ABOUT
 ## ESP는 MVC 프레임워크가 아닙니다.
 ESP는 MVC 프레임 워크가 아닙니다.  

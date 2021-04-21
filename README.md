@@ -261,6 +261,25 @@ if (ESP::login())(
 </form>
 <?php ESP::part_footer(); ?>
 ```
+## Log out
+Logging out is extremely intuitive.
+```
+<?php
+ESP::logout();
+ESP::redirect("/article/list");
+```
+
+## Login handling in writing
+Add the code `ESP::login_required();` to your writing file.
+`/src/article/create.php`
+```
+<?php
+ESP::login_required();
+ESP::auto_save(null, ['title','content']);
+
+... skip ...
+```
+Now, when you access the `/article/create` address, you will be automatically directed to the login page if you are not logged in.
 
 # ABOUT
 ## ESP is not an MVC framework.
