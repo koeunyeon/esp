@@ -281,6 +281,24 @@ ESP::auto_save(null, ['title','content']);
 ```
 Now, when you access the `/article/create` address, you will be automatically directed to the login page if you are not logged in.
 
+## Put author information in the article
+I will put the author information in the article table. Modify the table.
+```
+ALTER TABLE `article` ADD COLUMN `author_id` VARCHAR(512) NULL DEFAULT NULL AFTER `update_date`;
+```
+
+Add author information to the writing file.
+`/src/article/create.php`
+```
+<?php
+ESP::login_required();
+ESP::auto_save(null, ['title','content'], ['author_id'=>ESP::login_id()]);
+?>
+
+... skip ...
+```
+The first argument of the `auto_save` method is the table name, and the second is a list of keys to be used among POST data.  
+The last argument is the additional data to be stored.
 # ABOUT
 ## ESP is not an MVC framework.
 Yes. ESP is not an MVC framework.  

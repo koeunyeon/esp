@@ -296,6 +296,24 @@ ESP::auto_save(null, ['title', 'content']);
 ```
 이제 `/article/create` 주소에 접근하면 로그인이 되어 있지 않다면 자동으로 로그인 페이지로 이동합니다.
 
+## 글에 글쓴이 정보 넣기
+글 테이블에 글쓴이 정보를 넣겠습니다. 테이블을 수정합니다.
+```
+ALTER TABLE `article` ADD COLUMN `author_id` VARCHAR(512) NULL DEFAULT NULL AFTER `update_date`;	
+```
+
+글쓰기 파일에 글쓴이 정보를 추가합니다.
+`/src/article/create.php`
+```
+<?php
+ESP::login_required();
+ESP::auto_save(null, ['title', 'content'], ['author_id'=>ESP::login_id()]);
+?>
+
+... 생략 ...
+```
+`auto_save` 메소드의 첫번째 인수는 테이블 이름, 두번째는 POST 데이터 중 사용할 키 목록. 마지막 인수는 추가로 저장할 데이터입니다.
+
 # ABOUT
 ## ESP는 MVC 프레임워크가 아닙니다.
 ESP는 MVC 프레임 워크가 아닙니다.  
