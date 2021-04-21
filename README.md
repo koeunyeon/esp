@@ -45,7 +45,7 @@ $db_config=[
 
 This is all settings.
 
-## Create a blog writing screen
+## Blog writing screen
 Create the `/src/article/create.php` file and enter the code below.  
 ```
 <form method="POST">
@@ -62,7 +62,7 @@ First, let's run the local PHP server with the command `php -S localhost:8000`. 
 Instead of accessing the browser to http://localhost:8000/src/article/create.php, connect to [http://localhost:8000/article/create](http://localhost:8000/article/create) see.  
 Now we know that if you write the code according to the `/src/{resource}/{action}.php` rule, you can access the `/{resource}/{action}` path.  
 
-## Create blog writing function
+## Blog writing function
 Let's modify the `/src/article/create.php` file as follows.  
 ```
 <?php
@@ -85,7 +85,7 @@ The data to be saved is `http POST request ($_POST)`.
 If `{action}` is `create`, `insert` is executed, and if `edit`, `update` is executed.  
 Go to [http://localhost:8000/article/create](http://localhost:8000/article/create) again, enter the data, and check if it is saved in the database.  
 
-## Create a blog post view
+## Blog post view
 Automatically [http://localhost:8000/article/read/1](http://localhost:8000/article/read/1) after writing the title and content in http://localhost:8000/article/create You can see it go to.
 
 However, because the blog post viewing function has not been created yet, a **PAGE NOT FOUND** error is displayed. Let's fix it.
@@ -114,7 +114,7 @@ That is, instead of `/article/read?id=3`, it can also be used in the form of `/a
 
 The static methods `link_edit()`, `link_delete()`, and `link_list()` are helpers that automatically create edit, delete, and list links for the current `{resource}`.  
 
-## Create a blog post edit
+## Blog post edit
 Create the `/src/article/edit.php` file.
 ```
 <?php
@@ -135,7 +135,7 @@ The loaded data is used as an object like `$model->title`.
 In the example code, `$model` is a `EspData` type. Even if there is an invalid key, an empty string (`""`) is returned without returning an error.  
 In other words, even if there is no `missing` column in the `article` table, `$model->missing` returns `""`, so you can write the code as you think, regardless of whether there is actual data or not.  
 
-## Create a blog post delete
+## Blog post delete
 This time it is delete. Create a `/src/article/delete.php` file.
 ```
 <?php
@@ -143,7 +143,7 @@ ESP::auto_delete();
 ```
 It's only one line. ESP automatically deletes the resource and goes to the list page.  
 
-## show the list of blog posts
+## Blog post list
 Finally, let's show the list of articles. Create a `/src/article/list.php` file.
 ```
 <?php
@@ -185,7 +185,7 @@ Check it out at [http://localhost:8000/article/read_json/1](http://localhost:800
 
 # ABOUT
 ## ESP is not an MVC framework.
-ESP is not an MVC framework.  
+Yes. ESP is not an MVC framework.  
 ESP's goal is to develop faster.  
 ESP is confusing and unstructured, but it does contain useful features.  
 
