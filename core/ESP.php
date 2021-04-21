@@ -375,7 +375,6 @@ class ESP
         $login_pw = $login_pw ?? self::param("login_pw", null);
         
         if ($login_id == null || $login_pw == null){            
-            exit();
             return false;
         }
 
