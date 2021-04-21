@@ -1,15 +1,5 @@
 <?php
-// P::login_required();
-/*
-if (ESP::is_post()){
-    
-    $table_name = "article";
-    $use_columns = ["title", "content"];
-    $model_id = ESP::db($table_name)->param($use_columns)->insert();
-    ESP::redirect("/$table_name/view/?id=$model_id");
-    
-}
-*/
+ESP::login_required();
 ESP::auto_save(null, ['title', 'content']);
 ?>
 <?php ESP::part_header(); ?>
