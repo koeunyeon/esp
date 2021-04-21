@@ -4,7 +4,7 @@ It is a PHP framework that excludes the two and is oriented towards short code.
 Any part that can be handled automatically is as automated as possible.  
 
 - The Korean introduction page can be viewed at [ESP Korean Introduction](https://github.com/koeunyeon/esp/blob/main/README.ko.md).
-- The English introduction page is in [ESP English Introduction](https://github.com/koeunyeon/esp/blob/main/README.md).
+- The English introduction page is in [ESP English Introduction](https://koeunyeon.github.io/esp/).
 
 # Getting started
 ## what we will make
@@ -224,7 +224,20 @@ ESP::auto_save(null, ['title','content']);
 ```
 
 You can attach headers and footers using the `part_header()` and `part_footer()` methods.  
-
+## Sign Up
+Let's make a membership signup.
+### members table
+First, create a member table. If you want to use the membership function built into ESP, the `esp_user` table is required.  
+```
+CREATE TABLE `esp_user` (
+`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+`login_id` VARCHAR(20) NOT NULL,
+`login_pw` VARCHAR(256) NOT NULL,
+`insert_date` DATETIME NOT NULL,
+`update_date` DATETIME NULL DEFAULT NULL,
+PRIMARY KEY (`id`)
+)
+```
 ### Membership screen and features
 `/src/user/regist.php`
 ```
