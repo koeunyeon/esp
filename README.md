@@ -107,12 +107,12 @@ There is only one line of code to fetch data from the database.
 ```
 $model = ESP::auto_find();
 ```
-ESP `auto_find()`, similar to `auto_save()`, looks for data corresponding to `$id` in `{resource}`.
-Where is the `$id` variable? As you might expect, it reads `$_GET['id]`.
-If the URL is in the form of `{Resource}/{Action}/{ID}`, ESP automatically reads the `$id` variable from the URL instead of `$_GET['id']`.
-That is, instead of `/article/read?id=3`, it can also be used in the form of `/article/read/3`.
+ESP `auto_find()`, similar to `auto_save()`, looks for data corresponding to `$id` in `{resource}`.  
+Where is the `$id` variable? As you might expect, it reads `$_GET['id]`.  
+If the URL is in the form of `{Resource}/{Action}/{ID}`, ESP automatically reads the `$id` variable from the URL instead of `$_GET['id']`.  
+That is, instead of `/article/read?id=3`, it can also be used in the form of `/article/read/3`.  
 
-The static methods `link_edit()`, `link_delete()`, and `link_list()` are helpers that automatically create edit, delete, and list links for the current `{resource}`.
+The static methods `link_edit()`, `link_delete()`, and `link_list()` are helpers that automatically create edit, delete, and list links for the current `{resource}`.  
 
 ## Create a blog post edit
 Create the `/src/article/edit.php` file.
@@ -128,12 +128,12 @@ $model = ESP::auto_find();
 </form>
 ```
 
-ESP's `auto_save()` method differentiates between `insert` and `update` according to `{action}`.
-Therefore, even if you call the same function in `create.php` and `edit.php`, `insert` works in `create` and `update` works in `edit`.
+ESP's `auto_save()` method differentiates between `insert` and `update` according to `{action}`.  
+Therefore, even if you call the same function in `create.php` and `edit.php`, `insert` works in `create` and `update` works in `edit`.  
 
-The loaded data is used as an object like `$model->title`.
-In the example code, `$model` is a `EspData` type. Even if there is an invalid key, an empty string (`""`) is returned without returning an error.
-In other words, even if there is no `missing` column in the `article` table, `$model->missing` returns `""`, so you can write the code as you think, regardless of whether there is actual data or not.
+The loaded data is used as an object like `$model->title`.  
+In the example code, `$model` is a `EspData` type. Even if there is an invalid key, an empty string (`""`) is returned without returning an error.  
+In other words, even if there is no `missing` column in the `article` table, `$model->missing` returns `""`, so you can write the code as you think, regardless of whether there is actual data or not.  
 
 ## Create a blog post delete
 This time it is delete. Create a `/src/article/delete.php` file.
@@ -163,12 +163,12 @@ I'll create one more file before running it yet. The path is `/part/article/list
 <li><a href="<?= ESP::link_read($id) ?>"><?= $title ?></a></li>
 ```
 
-ESP assumes that a web page can be made up of several pieces. Therefore, it provides `part` family of methods to easily insert each piece.
-The `part_auto` method used in the example is responsible for automatically calling the `/part/{resource}/{action}.{path}.php` file and passing the `data` fragment.
-That is, the `ESP::part_auto("row", $row->items());` code passes `$row->items()` data to the `/part/article/list.row.php` file. .
+ESP assumes that a web page can be made up of several pieces. Therefore, it provides `part` family of methods to easily insert each piece.  
+The `part_auto` method used in the example is responsible for automatically calling the `/part/{resource}/{action}.{path}.php` file and passing the `data` fragment.  
+That is, the `ESP::part_auto("row", $row->items());` code passes `$row->items()` data to the `/part/article/list.row.php` file.  
 
-Files that make up a part (files under the `/part` directory) can use the values ​​passed in associative arrays like variables.
-`$id` and `$title` in `/part/article/list.row.php` are the values ​​of the `$row->items()` associative array in `/src/article/list.php`.
+Files that make up a part (files under the `/part` directory) can use the values ​​passed in associative arrays like variables.  
+`$id` and `$title` in `/part/article/list.row.php` are the values ​​of the `$row->items()` associative array in `/src/article/list.php`.  
 
 # ABOUT
 ## ESP is not an MVC framework.
