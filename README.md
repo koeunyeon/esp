@@ -83,7 +83,39 @@ The data to be saved is `http POST request ($_POST)`.
 If `{action}` is `create`, `insert` is executed, and if `edit`, `update` is executed.  
 Go to [http://localhost:8000/article/create](http://localhost:8000/article/create) again, enter the data, and check if it is saved in the database.  
 
-# ESP is not an MVC framework.
+## Create a blog post view
+Automatically [http://localhost:8000/article/read/1](http://localhost:8000/article/read/1) after writing the title and content in http://localhost:8000/article/create You can see it go to.
+
+However, because the blog post viewing function has not been created yet, a **PAGE NOT FOUND** error is displayed. Let's fix it.
+
+Let's create a file called `/src/article/read.php`.
+```
+<?php
+    $model = ESP::auto_find();
+?>
+<p>title: <?=$model->title ?></p>
+<p>content: <?=$model->content ?></p>
+
+<p><a href="<?= ESP::link_edit() ?>">edit</a></p>
+<p><a href="<?= ESP::link_delete() ?>">Delete</a></p>
+<p><a href="<?= ESP::link_list() ?>">List</a></p>
+```
+
+There is only one line of code to fetch data from the database.
+```
+$model = ESP::auto_find();
+```
+ESP `auto_find()`, similar to `auto_save()`, looks for data corresponding to `$id` in `{resource}`.
+Where is the `$id` variable? As you might expect, it reads `$_GET['id]`.
+If the URL is in the form of `{Resource}/{Action}/{ID}`, ESP automatically reads the `$id` variable from the URL instead of `$_GET['id']`.
+That is, instead of `/article/read?id=3`, it can also be used in the form of `/article/read/3`.
+
+The loaded data is used as an object like `$model->title`.
+In the example code, `$model` is a `EspData` type. Even if there is an invalid key, an empty string (`""`) is returned without returning an error.
+In other words, even if there is no `missing` column in the `article` table, `$model->missing` returns `""`, so you can write the code as you think, regardless of whether there is actual data or not.
+
+# ABOUT
+## ESP is not an MVC framework.
 ESP is not an MVC framework.  
 ESP's goal is to develop faster.  
 ESP is confusing and unstructured, but it does contain useful features.  
@@ -93,7 +125,17 @@ But we also know that good things are better developed faster than structures.
 
 Every tool has its own role. Even the finest hammer is not suitable for making small holes.  
 
-# About Me
+## PHP is not Java.
+From PHP version 7, PHP is changing as if it targets the enterprise domain dominated by Java.  
+But I think PHP and Java should have different positioning.  
+It's not bad for a Java world where you have to set rules on everything like a nagging mother and listen to a stinging sound if it goes against the rules.  
+However, there are times when you need to put more money on the rules than the rules and the speed rather than the stiffness.  
+This is especially true for "release and forget" web agency style development.  
+
+PHP is a "good language to work with on your own", and "a better language in that you can set your own rules."  
+ESP follows this philosophy of PHP and aims to be a "toolbox that can solve the problem at hand."  
+
+## About Me
 I am Korean, so I cannot speak English perfectly. Please understand even if there are awkward expressions.  
 
 During my time as a developer, I have come across a lot of frameworks in various languages, and I have a framework that suits me and I'm struggling.  
