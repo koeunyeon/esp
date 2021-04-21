@@ -129,12 +129,14 @@ class ESP
         return "/" . self::$_resource . "/list/" . $page;
     }
 
-    public static function link_list_next_page($page = 1){
+    public static function link_list_next_page($page = 1)
+    {
         return self::link_list($page + 1);
     }
 
-    public static function link_list_prev_page($page = 1){
-        if ($page == 1){
+    public static function link_list_prev_page($page = 1)
+    {
+        if ($page == 1) {
             return self::link_list(1);
         }
         return self::link_list($page - 1);
@@ -154,8 +156,8 @@ class ESP
     }
 
     public static function part($path, $view_data = [])
-    {        
-        $template_path = $_SERVER['DOCUMENT_ROOT'] . "/part/$path.php";        
+    {
+        $template_path = $_SERVER['DOCUMENT_ROOT'] . "/part/$path.php";
         if (file_exists($template_path)) {
             extract($view_data);
             require($template_path);
@@ -172,15 +174,17 @@ class ESP
         return self::part("common/footer");
     }
 
-    public static function part_auto($path = "", $view_data=[]){
-        if ($path == ""){
+    public static function part_auto($path = "", $view_data = [])
+    {
+        if ($path == "") {
             return self::part(self::$_resource . "/" . self::$_act, $view_data);
         }
 
-        return self::part(self::$_resource . "/" . self::$_act . "." .$path, $view_data);
+        return self::part(self::$_resource . "/" . self::$_act . "." . $path, $view_data);
     }
 
-    public static function auto_insert($table_name = null, $use_columns = [], $extra_data=[]){
+    public static function auto_insert($table_name = null, $use_columns = [], $extra_data = [])
+    {
         if (self::is_post()) {
             $id = ESP::db($table_name)->param($use_columns)->fill($extra_data)->insert();
             return $id;
@@ -188,7 +192,8 @@ class ESP
         return null;
     }
 
-    public static function auto_update($table_name = null, $use_columns = [], $extra_data=[]){
+    public static function auto_update($table_name = null, $use_columns = [], $extra_data = [])
+    {
         if (self::is_post()) {
             $upd_result = ESP::db($table_name)->param($use_columns)->fill($extra_data)->update();
             if ($upd_result) {
@@ -199,11 +204,11 @@ class ESP
         }
     }
 
-    public static function auto_save($table_name = null, $use_columns = [], $extra_data=[])
+    public static function auto_save($table_name = null, $use_columns = [], $extra_data = [])
     {
         if (self::$_act == "create") {
             $id = self::auto_insert($table_name, $use_columns, $extra_data);
-            if ($id != null){
+            if ($id != null) {
                 self::redirect_read($id);
             }
         } elseif (self::$_act == "edit") {
@@ -231,7 +236,8 @@ class ESP
         }
     }
 
-    public static function auto_pagenate($table_name = null, $where_terms = [], $order_by='insert_date desc', $count_per_page=10){
+    public static function auto_pagenate($table_name = null, $where_terms = [], $order_by = 'insert_date desc', $count_per_page = 10)
+    {
         $page_no = ESP::param_uri(0, "1");
         return self::db($table_name)->pagenate($page_no, $where_terms, $order_by, $count_per_page);
     }
@@ -251,7 +257,8 @@ class ESP
         return array_keys($arr) !== range(0, count($arr) - 1);
     }
 
-    public static function array_map_assoc(callable $f, array $a) {
+    public static function array_map_assoc(callable $f, array $a)
+    {
         return array_column(array_map($f, array_keys($a), $a), 1, 0);
     }
 
@@ -267,34 +274,32 @@ class ESP
         exit();
     }
 
-    public static function response_json($data){
+    public static function response_json($data)
+    {
         $json_value = [];
-        if ($data instanceof EspData){
+        if ($data instanceof EspData) {
             $json_value = $data->to_json();
-        }elseif(gettype($data) == "array" &&  self::is_assoc_array($data) == false){ // 순차 배열일 경우            
-            $json_value = array_map(function($item){
-                if ($item instanceof EspData){
+        } elseif (gettype($data) == "array" &&  self::is_assoc_array($data) == false) { // 순차 배열일 경우            
+            $json_value = array_map(function ($item) {
+                if ($item instanceof EspData) {
                     return $item->items();
                 }
                 return $item;
             }, $data);
-            $json_value = json_encode($json_value);       
-
-        }elseif(gettype($data) == "array" && self::is_assoc_array($data)){ // 연관 배열일 경우
-            $json_value = self::array_map_assoc(function($key, $item){
-                if ($item instanceof EspData){
+            $json_value = json_encode($json_value);
+        } elseif (gettype($data) == "array" && self::is_assoc_array($data)) { // 연관 배열일 경우
+            $json_value = self::array_map_assoc(function ($key, $item) {
+                if ($item instanceof EspData) {
                     return [$key, $item->items()];
                 }
                 return $item;
             }, $data);
-            $json_value = json_encode($json_value);     
-        }
-        
-        else{
+            $json_value = json_encode($json_value);
+        } else {
             $json_value = $data;
             $json_value = json_encode($json_value);
         }
-        
+
         header('Content-type: application/json');
         echo $json_value;
         exit();
@@ -338,7 +343,7 @@ class ESP
 
     // login
     public static $_LOGIN_KEY = "LOGIN_ID";
-    
+
     public static function is_login()
     {
         return self::session_has_key(self::$_LOGIN_KEY);
@@ -351,39 +356,41 @@ class ESP
         }
     }
 
-    public static function regist($login_id=null, $login_pw=null){
+    public static function regist($login_id = null, $login_pw = null)
+    {
         $login_id = $login_id ?? self::param("login_id", null);
         $login_pw = $login_pw ?? self::param("login_pw", null);
-        
-        if ($login_id == null || $login_pw == null){
+
+        if ($login_id == null || $login_pw == null) {
             return [false, "INVALID_PARAMETER"];
         }
 
-        $user_exist = self::db("esp_user")->exist(['login_id'=> $login_id]);
-        if ($user_exist){
+        $user_exist = self::db("esp_user")->exist(['login_id' => $login_id]);
+        if ($user_exist) {
             return [false, "USER_EXIST"];
         }
 
         $login_pw = password_hash($login_pw, PASSWORD_BCRYPT);
 
-        self::db("esp_user")->fill(['login_id'=>$login_id, 'login_pw'=>$login_pw])->insert();
+        self::db("esp_user")->fill(['login_id' => $login_id, 'login_pw' => $login_pw])->insert();
         return [true, "SUCCESS"];
     }
 
-    public static function login($login_id=null, $login_pw=null){
+    public static function login($login_id = null, $login_pw = null)
+    {
         $login_id = $login_id ?? self::param("login_id", null);
         $login_pw = $login_pw ?? self::param("login_pw", null);
-        
-        if ($login_id == null || $login_pw == null){            
+
+        if ($login_id == null || $login_pw == null) {
             return false;
         }
 
-        $user = self::db("esp_user")->first(['login_id'=> $login_id]);
-        if ($user->is_empty()){
+        $user = self::db("esp_user")->first(['login_id' => $login_id]);
+        if ($user->is_empty()) {
             return false;
         }
 
-        if (password_verify($login_pw, $user->login_pw)){
+        if (password_verify($login_pw, $user->login_pw)) {
             self::login_success($login_id);
             return true;
         }
@@ -396,7 +403,8 @@ class ESP
         self::session_set(self::$_LOGIN_KEY, $login_id);
     }
 
-    public static function logout(){
+    public static function logout()
+    {
         self::session_remove(self::$_LOGIN_KEY);
     }
 
@@ -406,25 +414,34 @@ class ESP
     }
 
     // is_author
-    public static function is_author()
+    public static function is_author($table_name=null)
     {
-        $model = self::auto_find();
+        $model = self::auto_find($table_name);
         return $model->author_id == self::login_id();
     }
 
-    public static function author_matched()
+    public static function author_matched($table_name=null)
     {
         ESP::login_required();
-        return self::is_author();
+        return self::is_author($table_name);
     }
 
-    public static function html_ul_open($css_class=null, $html_id=null){
+    public static function author_if_not_matched_to_list($table_name=null)
+    {
+        if (self::author_matched($table_name) == false){
+            return self::redirect_list();
+        }
+    }
+
+    public static function html_ul_open($css_class = null, $html_id = null)
+    {
         $css_class = $css_class == null ? "" : " class='$css_class' ";
         $html_id = $html_id == null ? "" : " id='$html_id' ";
         echo "<ul $css_class $html_id>";
     }
 
-    public static function html_ul_close(){
+    public static function html_ul_close()
+    {
         echo "</ul>";
     }
 }
@@ -438,7 +455,8 @@ class ESPDB
         $this->table_name = $table_name;
     }
 
-    public function fill($column_values){
+    public function fill($column_values)
+    {
         var_dump($column_values);
         $this->column_values = array_merge($this->column_values, $column_values);
         return $this;
@@ -608,24 +626,26 @@ class ESPDB
         return $where;
     }
 
-    private function make_orderby($orderby){
+    private function make_orderby($orderby)
+    {
         if (ESP::trim($orderby) !== '') {
             $orderby = " order by " . $orderby;
         }
         return $orderby;
     }
-    
-    private function make_limit($limit){
-        if ($limit == null){
+
+    private function make_limit($limit)
+    {
+        if ($limit == null) {
             return "";
         }
-    
+
         return " limit $limit";
     }
 
     public function insert()
-    {        
-        $columns = array_keys($this->column_values);        
+    {
+        $columns = array_keys($this->column_values);
         $value_placeholders = array_map(
             function ($key) {
                 return ":$key";
@@ -651,37 +671,40 @@ class ESPDB
         return $this->execute_fetch_first($query, ['id' => $id]);
     }
 
-    public function first($where_terms){
+    public function first($where_terms)
+    {
         $terms = $this->make_terms($where_terms);
         $query = " select * from {$this->table_name} $terms limit 1";
         $result = $this->execute_fetch_first($query, $where_terms);
         return $result;
-
     }
 
-    public function all($where_terms = [], $order_by=null, $limit=null)
+    public function all($where_terms = [], $order_by = null, $limit = null)
     {
         $terms = $this->make_terms($where_terms);
         $order_by = $this->make_orderby($order_by);
         $limit = $this->make_limit($limit);
-        $query = "select * from {$this->table_name} $terms $order_by $limit";        
+        $query = "select * from {$this->table_name} $terms $order_by $limit";
         $result = $this->execute_fetch_all($query, $where_terms);
         return $result;
     }
 
-    public function pagenate($page_no, $where_terms = [], $order_by='insert_date desc', $count_per_page=10){
-        $offset = ($page_no -1) * $count_per_page;
+    public function pagenate($page_no, $where_terms = [], $order_by = 'insert_date desc', $count_per_page = 10)
+    {
+        $offset = ($page_no - 1) * $count_per_page;
         return $this->all($where_terms, $order_by, "$offset,$count_per_page");
     }
 
-    public function count($where_terms){
+    public function count($where_terms)
+    {
         $terms = $this->make_terms($where_terms);
-        $query = " select count(id) as cnt from {$this->table_name} $terms ";        
-        $result = $this->execute_fetch_all($query, $where_terms);        
+        $query = " select count(id) as cnt from {$this->table_name} $terms ";
+        $result = $this->execute_fetch_all($query, $where_terms);
         return $result[0]->cnt;
     }
 
-    public function exist($where_terms){
+    public function exist($where_terms)
+    {
         $result = $this->count($where_terms);
         return $result > 0;
     }
@@ -769,7 +792,8 @@ class EspData
         return $this->attributes;
     }
 
-    public function to_json(){
+    public function to_json()
+    {
         return json_encode($this->attributes);
     }
 }
