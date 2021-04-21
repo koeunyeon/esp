@@ -233,6 +233,16 @@ class ESP
         return $data;
     }
 
+    public static function is_assoc_array($arr)
+    {
+        if (array() === $arr) return false;
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
+    public static function array_map_assoc(callable $f, array $a) {
+        return array_column(array_map($f, array_keys($a), $a), 1, 0);
+    }
+
     public static function trim($str)
     {
         return preg_replace("/(^\s+)|(\s+$)/us", "", $str);
@@ -245,8 +255,34 @@ class ESP
         exit();
     }
 
-    public static function response_json($esp_data){
-        $json_value = $esp_data->to_json();
+    public static function response_json($data){
+        $json_value = [];
+        if ($data instanceof EspData){
+            $json_value = $data->to_json();
+        }elseif(gettype($data) == "array" &&  self::is_assoc_array($data) == false){ // 순차 배열일 경우            
+            $json_value = array_map(function($item){
+                if ($item instanceof EspData){
+                    return $item->items();
+                }
+                return $item;
+            }, $data);
+            $json_value = json_encode($json_value);       
+
+        }elseif(gettype($data) == "array" && self::is_assoc_array($data)){ // 연관 배열일 경우
+            $json_value = self::array_map_assoc(function($key, $item){
+                if ($item instanceof EspData){
+                    return [$key, $item->items()];
+                }
+                return $item;
+            }, $data);
+            $json_value = json_encode($json_value);     
+        }
+        
+        else{
+            $json_value = $data;
+            $json_value = json_encode($json_value);
+        }
+        
         header('Content-type: application/json');
         echo $json_value;
         exit();
